@@ -1,2 +1,2 @@
 # brooklyn-ansible
-Automate the installation of Brooklyn on Debian 9
+Automate the installation of [https://github.com/KDE/brooklyn Brooklyn] on Debian 9
