@@ -1,0 +1,16 @@
+[Unit]
+Description=Brooklyn
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=idle
+WorkingDirectory=/opt/brooklyn
+ExecStart= /bin/sh brooklyn.sh
+SyslogIdentifier=brooklyn
+User=brooklyn
+Group=www-data
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

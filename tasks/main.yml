@@ -1,0 +1,156 @@
+- name: Check OS compatibility
+  fail:
+    msg: "Installation works only on Debian 9"
+  when:
+     ansible_distribution != "Debian" or
+     ansible_distribution_major_version != "9"
+
+- name: Install git
+  apt:
+    name: git
+    state: latest
+
+- name: Install java openjdk
+  apt:
+    name: openjdk-8-jdk
+    state: latest
+
+- name: Install maven
+  apt:
+    name: maven
+    state: latest
+
+- name: Checkout brooklyn
+  git:
+    repo: https://github.com/KDE/brooklyn.git
+    dest: /tmp/brooklyn
+    force: yes
+  register: git_repo_updated
+
+- name: Build brooklyn
+  command: mvn install
+  args:
+    chdir: /tmp/brooklyn
+  when: git_repo_updated.changed
+
+- name: Clean brooklyn opt dir
+  file:
+    state: absent
+    path: /opt/brooklyn
+  when: git_repo_updated.changed
+
+- name: Move brooklyn jars to brooklyn opt dir
+  command: cp -a /tmp/brooklyn/target/. /opt/brooklyn
+  when: git_repo_updated.changed
+
+- name: Set permissions to brooklyn opt dir
+  file:
+    path: /opt/brooklyn
+    state: directory
+    recurse: yes
+    mode: "u=rwx,g=rx,o=rx"
+
+- name: Install nginx
+  apt:
+    name: nginx
+    state: latest
+
+- name: Remove index from nginx
+  file:
+    path: /usr/share/nginx/html/index.html
+    state: absent
+
+- name: Configuring nginx
+  template:
+    src: templates/nginx.j2
+    dest: /etc/nginx/sites-available/default
+  notify:
+     - restart nginx
+
+- name: Create brooklyn group
+  group:
+    name: brooklyn
+    state: present
+
+- name: Create brooklyn user
+  user:
+    name: brooklyn
+    groups: "brooklyn, www-data"
+
+- name: Give the right permissions to www-data group on nginx data folder
+  file:
+    path: /usr/share/nginx/html
+    mode: "u=rwx,g=rwx,o="
+    group: www-data
+    owner: www-data
+
+- name: Create the config folder
+  file:
+    path: /etc/brooklyn
+    owner: brooklyn
+    group: brooklyn
+    mode: "u=rwx,g=,o="
+    state: directory
+
+- name: Configuring brooklyn
+  copy:
+    content: "{{ brooklyn_conf | to_nice_yaml }}"
+    dest: /etc/brooklyn/conf.yml
+    owner: brooklyn
+    group: brooklyn
+    mode: "u=rwx,g=,o="
+
+- name: Move the clean script to brooklyn opt dir
+  copy:
+    src: clean.py
+    dest: /opt/brooklyn/clean.py
+    owner: brooklyn
+    group: brooklyn
+    mode: "u=rwx,g=,o="
+
+- name: Move brooklyn.sh to opt dir
+  copy:
+    src: brooklyn.sh
+    dest: /opt/brooklyn/brooklyn.sh
+    owner: brooklyn
+    group: brooklyn
+    mode: "u=rwx,g=,o="
+
+- name: Install python
+  apt:
+    name: python3
+    state: latest
+
+- name: Install cron
+  apt:
+    name: cron
+    state: latest
+
+- name: Run clean script every hour
+  cron:
+    name: "Clean script every hour"
+    user: brooklyn
+    minute: 01
+    job: python3 /opt/brooklyn/
+
+- name: Copy brooklyn service
+  copy:
+    src: files/brooklyn.service
+    dest: /lib/systemd/system/brooklyn.service
+    owner: root
+    group: root
+    mode: 0644 
+
+- name: Configuring brooklyn service
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: brooklyn
+  when: git_repo_updated.changed
+
+- name: Check if brooklyn service is started
+  systemd:
+    state: started
+    enabled: yes
+    daemon_reload: yes
+    name: brooklyn

@@ -1,0 +1,35 @@
+brooklyn_conf:
+   bots:
+      rbot:
+         type: "RocketChatBot"
+         websocket-url: "wss://chat.wikitolearn.org/websocket"
+         file-upload-url: "https://chat.wikitolearn.org/file-upload"
+         username: "user"
+         password: "password"
+      ibot:
+         type: "IrcBot"
+         username: "user"
+         host: "chat.freenode.net"
+      tbot:
+         type: "TelegramBot"
+         username: "botId"
+         password: "token"
+   channels:
+      ch1:
+         bot: rbot
+         name: "aac7KBHmdfwMnHvFk"
+      ch2:
+         bot: ibot
+         name: "#wikitolearn"
+      ch3:
+         bot: tbot
+         name: "-200853295"
+   bridges:
+      -
+         - ch1
+         - ch2
+         - ch3
+   webserver:
+      content-folder: "/usr/share/nginx/html"
+      base-url: "https://brooklyn.wikitolearn.vodka/"
+   db-uri: "jdbc:sqlite:"
