@@ -2,7 +2,7 @@ import os
 import shutil
 from datetime import date
 
-contentFolder = "/usr/share/nginx/html"  # Folder to clean
+contentFolder = "/var/www/html"  # Folder to clean
 maxSizeGB = 5  # Max folder size
 nDaysBeforeExpiration = 30
 

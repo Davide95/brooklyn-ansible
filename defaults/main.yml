@@ -1,3 +1,4 @@
+
 brooklyn_conf:
    bots:
       rbot:
@@ -30,6 +31,6 @@ brooklyn_conf:
          - ch2
          - ch3
    webserver:
-      content-folder: "/usr/share/nginx/html"
+      content-folder: "/var/www/html"
       base-url: "https://brooklyn.wikitolearn.vodka/"
    db-uri: "jdbc:sqlite:"

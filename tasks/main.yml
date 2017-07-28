@@ -34,9 +34,7 @@
   when: git_repo_updated.changed
 
 - name: Clean brooklyn opt dir
-  file:
-    state: absent
-    path: /opt/brooklyn
+  shell: /bin/rm -rf /opt/brooklyn/*
   when: git_repo_updated.changed
 
 - name: Move brooklyn jars to brooklyn opt dir
@@ -57,7 +55,7 @@
 
 - name: Remove index from nginx
   file:
-    path: /usr/share/nginx/html/index.html
+    path: /var/www/html/index.nginx-debian.html
     state: absent
 
 - name: Configuring nginx
@@ -79,7 +77,7 @@
 
 - name: Give the right permissions to www-data group on nginx data folder
   file:
-    path: /usr/share/nginx/html
+    path: /var/www/html
     mode: "u=rwx,g=rwx,o="
     group: www-data
     owner: www-data

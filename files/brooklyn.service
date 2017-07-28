@@ -11,8 +11,6 @@ SyslogIdentifier=brooklyn
 User=brooklyn
 Group=www-data
 StandardError=syslog
-Restart=always
-RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
