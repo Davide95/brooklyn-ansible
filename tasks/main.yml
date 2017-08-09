@@ -33,6 +33,11 @@
     chdir: /tmp/brooklyn
   when: git_repo_updated.changed
 
+- name: Stop systemd service
+  service:
+    name: brooklyn
+    state: stopped
+
 - name: Clean brooklyn opt dir
   shell: /bin/rm -rf /opt/brooklyn/*
   when: git_repo_updated.changed
