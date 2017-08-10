@@ -37,6 +37,7 @@
   service:
     name: brooklyn
     state: stopped
+  when: git_repo_updated.changed
 
 - name: Clean brooklyn opt dir
   shell: /bin/rm -rf /opt/brooklyn/*
