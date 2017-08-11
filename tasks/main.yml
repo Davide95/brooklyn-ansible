@@ -23,14 +23,20 @@
 - name: Checkout brooklyn
   git:
     repo: https://github.com/KDE/brooklyn.git
-    dest: /tmp/brooklyn
+    dest: /usr/local/share/brooklyn-repo/
     force: yes
   register: git_repo_updated
+
+- name: Clean target dir
+  file:
+    state: absent
+    path: /usr/local/share/brooklyn-repo/target
+  when: git_repo_updated.changed
 
 - name: Build brooklyn
   command: mvn install
   args:
-    chdir: /tmp/brooklyn
+    chdir: /usr/local/share/brooklyn-repo/
   when: git_repo_updated.changed
 
 - name: Stop systemd service
@@ -39,20 +45,22 @@
     state: stopped
   when: git_repo_updated.changed
 
-- name: Clean brooklyn opt dir
-  file:
-    state: absent
-    path: /opt/brooklyn
-  when: git_repo_updated.changed
-
+- name: Install rsync
+  apt:
+    name: rsync
+    state: latest
 
 - name: Move brooklyn jars to brooklyn opt dir
-  command: cp -a /tmp/brooklyn/target/. /opt/brooklyn
-  when: git_repo_updated.changed
+  synchronize:
+    src: /usr/local/share/brooklyn-repo/target/
+    dest: /opt/brooklyn/
+    archive: yes
+    delete: yes
+  delegate_to: "{{ inventory_hostname }}"
 
 - name: Set permissions to brooklyn opt dir
   file:
-    path: /opt/brooklyn
+    path: /opt/brooklyn/
     state: directory
     recurse: yes
     mode: "u=rwx,g=rx,o=rx"
@@ -69,7 +77,7 @@
 
 - name: Configuring nginx
   template:
-    src: templates/nginx.j2
+    src: nginx.j2
     dest: /etc/nginx/sites-available/default
   notify:
      - restart nginx
@@ -78,11 +86,14 @@
   group:
     name: brooklyn
     state: present
+    system: yes
 
 - name: Create brooklyn user
   user:
     name: brooklyn
     groups: "brooklyn, www-data"
+    system: yes
+    home: /var/lib/brooklyn
 
 - name: Give the right permissions to www-data group on nginx data folder
   file:
@@ -138,7 +149,7 @@
     name: "Clean script every hour"
     user: brooklyn
     minute: 01
-    job: python3 /opt/brooklyn/
+    job: python3 /opt/brooklyn/clean.py
 
 - name: Copy brooklyn service
   copy:
@@ -146,7 +157,7 @@
     dest: /lib/systemd/system/brooklyn.service
     owner: root
     group: root
-    mode: 0644 
+    mode: 0644
 
 - name: Configuring brooklyn service
   systemd:
