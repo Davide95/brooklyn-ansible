@@ -44,6 +44,7 @@
     name: brooklyn
     state: stopped
   when: git_repo_updated.changed
+  ignore_errors: yes
 
 - name: Install rsync
   apt:
