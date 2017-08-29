@@ -44,6 +44,7 @@
     name: brooklyn
     state: stopped
   when: git_repo_updated.changed
+  ignore_errors: yes
 
 - name: Install rsync
   apt:
@@ -167,16 +168,8 @@
     group: root
     mode: 0644
 
-- name: Configuring brooklyn service
+- name: Restarting brooklyn service
   systemd:
     state: restarted
-    daemon_reload: yes
-    name: brooklyn
-  when: git_repo_updated.changed
-
-- name: Check if brooklyn service is started
-  systemd:
-    state: started
-    enabled: yes
     daemon_reload: yes
     name: brooklyn
