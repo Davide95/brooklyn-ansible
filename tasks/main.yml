@@ -95,6 +95,14 @@
     system: yes
     home: /var/lib/brooklyn
 
+- name: Create the log folder
+  file:
+    path: /var/log/brooklyn
+    owner: brooklyn
+    group: brooklyn
+    mode: "u=rwx,g=r,o=r"
+    state: directory
+
 - name: Give the right permissions to www-data group on nginx data folder
   file:
     path: /var/www/html
@@ -153,7 +161,7 @@
 
 - name: Copy brooklyn service
   copy:
-    src: files/brooklyn.service
+    src: brooklyn.service
     dest: /lib/systemd/system/brooklyn.service
     owner: root
     group: root
