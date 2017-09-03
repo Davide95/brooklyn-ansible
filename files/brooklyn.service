@@ -4,6 +4,7 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
+EnvironmentFile=/etc/brooklyn/env-vars
 Type=idle
 WorkingDirectory=/opt/brooklyn
 ExecStart= /bin/sh brooklyn.sh
