@@ -8,7 +8,7 @@ brooklyn_conf:
          username: "user"
          password: "password"
       ibot:
-         type: "IrcBot"
+         type: "IRCBot"
          username: "user"
          host: "chat.freenode.net"
       tbot:
