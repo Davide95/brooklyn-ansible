@@ -100,7 +100,7 @@
     path: /var/log/brooklyn
     owner: brooklyn
     group: brooklyn
-    mode: "u=rwx,g=r,o=r"
+    mode: "u=rwx,g=rx,o=rx"
     state: directory
 
 - name: Give the right permissions to www-data group on nginx data folder
